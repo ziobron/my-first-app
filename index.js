@@ -6,6 +6,20 @@
  * @param {import('probot').Probot} app
  */
 module.exports = (app) => {
+  app.onAny(async (context) => {
+    context.log.info({ event: context.name, action: context.payload.action });
+  });
+
+  app.on("issues.opened", async (context) => {
+    // `context` extracts information from the event, which can be passed to
+    // GitHub API calls. This will return:
+    //   { owner: 'yourname', repo: 'yourrepo', number: 123, body: 'Hello World! }
+    const params = context.issue({ body: "Hello World!" });
+
+    // Post a comment on the issue
+    return context.octokit.issues.createComment(params);
+  });
+
   app.on(["check_suite.requested", "check_run.rerequested"], check);
 
   async function check(context) {
